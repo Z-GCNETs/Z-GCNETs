@@ -96,7 +96,7 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
     print("  --- End Zigzag")  # Beginning
 
     # To show persistence intervals
-    window_PD = []
+    window_ZPD = []
     # Personalized plot
     for vv, dgm in enumerate(G_dgms):
         print("Dimension:", vv)
@@ -108,13 +108,13 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
                 matBarcode[k, 1] = p.death
                 k = k + 1
             matBarcode = matBarcode / 2
-            window_PD.append(matBarcode)
+            window_ZPD.append(matBarcode)
 
     # Timing
     print("TIME: " + str((time.time() - start_time)) + " Seg ---  " + str(
         (time.time() - start_time) / 60) + " Min ---  " + str((time.time() - start_time) / (60 * 60)) + " Hr ")
 
-    return window_PD
+    return window_ZPD
 
 
 # Ethereum token networks zigzag persistence image (ZPI)
