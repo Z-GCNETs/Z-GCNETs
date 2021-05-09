@@ -11,11 +11,11 @@ import time
 
 path = os.getcwd()
 
-# Token PD #
+# Ethereum token networks zigzag persistence diagram (ZPD)
 def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 100, scaleParameter = 1., maxDimHoles = 2, sizeWindow = 7):
-    # %% To measure time
+    # To measure time
     start_time = time.time()
-    # %% Generate Graph #
+    # Generate Graph #
     GraphsNetX = []
     index = index + 1 # since data label is from 1
     for ii in range(index, index + sizeWindow):
@@ -30,7 +30,7 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
                 g.add_edge(int(tmp_W[i, 0] - 1), int(tmp_W[i, 1] - 1), weight=tmp_W[i, 2])
         GraphsNetX.append(g)
 
-    # %% Building unions and computing distance matrices
+    # Building unions and computing distance matrices
     print("Building unions and computing distance matrices...")  # Beginning
     GUnions = []
     MDisGUnions = []
@@ -54,12 +54,12 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
         MDisAux[NVertices:(2 * NVertices), 0:NVertices] = C.transpose()
         # Distance in condensed form
         pDisAux = squareform(MDisAux)
-        # --- To save unions and distances
+        # To save unions and distances
         GUnions.append(unionAux)  # To save union
         MDisGUnions.append(pDisAux)  # To save distance matrix
     print("  --- End unions...")  # Ending
 
-    # %% To perform Ripser computations
+    # To perform Ripser computations
     print("Computing Vietoris-Rips complexes...")  # Beginning
 
     GVRips = []
@@ -69,7 +69,7 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
         GVRips.append(ripsAux)
     print("  --- End Vietoris-Rips computation")  # Ending
 
-    # %% Shifting filtrations...
+    # Shifting filtrations...
     print("Shifting filtrations...")  # Beginning
     GVRips_shift = []
     GVRips_shift.append(GVRips[0])  # Shift 0... original rips01
@@ -78,26 +78,26 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
         GVRips_shift.append(shiftAux)
     print("  --- End shifting...")  # Ending
 
-    # %% To Combine complexes
+    # To Combine complexes
     print("Combining complexes...")  # Beginning
     completeGVRips = zzt.complex_union(GVRips[0], GVRips_shift[1])
     for uu in range(2, sizeWindow - 1):
         completeGVRips = zzt.complex_union(completeGVRips, GVRips_shift[uu])
     print("  --- End combining")  # Ending
 
-    # %% To compute the time intervals of simplices
+    # To compute the time intervals of simplices
     print("Determining time intervals...")  # Beginning
     time_intervals = zzt.build_zigzag_times(completeGVRips, NVertices, sizeWindow)
     print("  --- End time")  # Beginning
 
-    # %% To compute Zigzag persistence
+    # To compute Zigzag persistence
     print("Computing Zigzag homology...")  # Beginning
     G_zz, G_dgms, G_cells = d.zigzag_homology_persistence(completeGVRips, time_intervals)
     print("  --- End Zigzag")  # Beginning
 
-    # %% To show persistence intervals
+    # To show persistence intervals
     window_PD = []
-    # %% Personalized plot
+    # Personalized plot
     for vv, dgm in enumerate(G_dgms):
         print("Dimension:", vv)
         if (vv < 2):
@@ -117,7 +117,7 @@ def token_zigzag_persistence_diagrams(dataset = None, index = None, NVertices = 
     return window_PD
 
 
-# Token PI #
+# Ethereum token networks zigzag persistence image (ZPI)
 def token_zigzag_persistence_images(dgms, resolution = [50,50], return_raw = False, normalization = True, bandwidth = 1., power = 1., dimensional = 0):
     PXs, PYs = np.vstack([dgm[:, 0:1] for dgm in dgms]), np.vstack([dgm[:, 1:2] for dgm in dgms])
     xm, xM, ym, yM = PXs.min(), PXs.max(), PYs.min(), PYs.max()
@@ -127,7 +127,7 @@ def token_zigzag_persistence_images(dgms, resolution = [50,50], return_raw = Fal
     Zfinal = np.zeros(X.shape)
     X, Y = X[:, :, np.newaxis], Y[:, :, np.newaxis]
 
-    # Compute image
+    # Compute zigzag persistence image
     P0, P1 = np.reshape(dgms[int(dimensional)][:, 0], [1, 1, -1]), np.reshape(dgms[int(dimensional)][:, 1], [1, 1, -1])
     weight = np.abs(P1 - P0)
     distpts = np.sqrt((X - P0) ** 2 + (Y - P1) ** 2)
