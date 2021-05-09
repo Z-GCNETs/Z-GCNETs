@@ -163,7 +163,7 @@ def zigzag_persistence_diagrams(dataset, index, alpha, NVertices, scaleParameter
     print("  --- End Zigzag")  # Beginning
 
     # To show persistence intervals
-    window_PD = []
+    window_ZPD = []
     # Personalized plot
     for vv, dgm in enumerate(G_dgms):
         print("Dimension:", vv)
@@ -175,13 +175,13 @@ def zigzag_persistence_diagrams(dataset, index, alpha, NVertices, scaleParameter
                 matBarcode[k, 1] = p.death
                 k = k + 1
             matBarcode = matBarcode / 2
-            window_PD.append(matBarcode)
+            window_ZPD.append(matBarcode)
 
     # Timing
     print("TIME: " + str((time.time() - start_time)) + " Seg ---  " + str(
         (time.time() - start_time) / 60) + " Min ---  " + str((time.time() - start_time) / (60 * 60)) + " Hr ")
 
-    return window_PD
+    return window_ZPD
 
 
 # Zigzag persistence diagram (ZPD) for the nested sliding window
@@ -304,7 +304,7 @@ def nested_zigzag_persistence_diagrams(dataset, index, alpha, NVertices, scalePa
     print("  --- End Zigzag")  # Beginning
 
     # To show persistence intervals
-    window_PD = []
+    window_ZPD = []
     # Personalized plot
     for vv, dgm in enumerate(G_dgms):
         print("Dimension:", vv)
@@ -316,13 +316,13 @@ def nested_zigzag_persistence_diagrams(dataset, index, alpha, NVertices, scalePa
                 matBarcode[k, 1] = p.death
                 k = k + 1
             matBarcode = matBarcode / 2
-            window_PD.append(matBarcode)
+            window_ZPD.append(matBarcode)
 
     # Timing
     print("TIME: " + str((time.time() - start_time)) + " Seg ---  " + str(
         (time.time() - start_time) / 60) + " Min ---  " + str((time.time() - start_time) / (60 * 60)) + " Hr ")
 
-    return window_PD
+    return window_ZPD
 
 
 # Zigzag persistence image
