@@ -335,7 +335,7 @@ def zigzag_persistence_images(dgms, resolution = [50,50], return_raw = False, no
     Zfinal = np.zeros(X.shape)
     X, Y = X[:, :, np.newaxis], Y[:, :, np.newaxis]
 
-    # Compute Zigzag persistence image
+    # Compute zigzag persistence image
     P0, P1 = np.reshape(dgms[int(dimensional)][:, 0], [1, 1, -1]), np.reshape(dgms[int(dimensional)][:, 1], [1, 1, -1])
     weight = np.abs(P1 - P0)
     distpts = np.sqrt((X - P0) ** 2 + (Y - P1) ** 2)
