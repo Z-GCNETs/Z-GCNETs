@@ -37,7 +37,7 @@ def load_st_fulldataset(dataset, val_ratio, test_ratio):
 
 
 # parameter setting
-alpha = 0.5
+alpha = 0.3
 NVertices = 307 # Number of vertices
 scaleParameter = 1.0 # Scale Parameter (Maximum) # the maximal edge weight 
 maxDimHoles = 2 # Maximum Dimension of Holes (It means.. 0 and 1)
