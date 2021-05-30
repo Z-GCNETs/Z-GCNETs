@@ -4,7 +4,7 @@ from ZGCNCELL import NLSGCRNCNNCell
 
 
 class NNLSDCRNNCNN(nn.Module):
-    def __init__(self, node_num, dim_in, dim_out, cheb_k, embed_dim, num_layers=1, window_len = 12):
+    def __init__(self, node_num, dim_in, dim_out, link_len, embed_dim, num_layers=1, window_len = 12):
         super(NNLSDCRNNCNN, self).__init__()
         assert num_layers >= 1, 'At least one DCRNN layer in the Encoder.'
         self.node_num = node_num
@@ -13,9 +13,9 @@ class NNLSDCRNNCNN(nn.Module):
         self.window_len = window_len
         self.nlsdcrnncnn_cells = nn.ModuleList()
         for _ in range(0, num_layers-1):
-            self.nlsdcrnncnn_cells.append(NLSGCRNCNNCell(node_num, dim_in, dim_out, window_len, cheb_k, embed_dim))
+            self.nlsdcrnncnn_cells.append(NLSGCRNCNNCell(node_num, dim_in, dim_out, window_len, link_len, embed_dim))
         for _ in range(num_layers-1, num_layers):
-            self.nlsdcrnncnn_cells.append(NLSGCRNCNNCell(node_num, dim_out, dim_out, window_len, cheb_k, embed_dim))
+            self.nlsdcrnncnn_cells.append(NLSGCRNCNNCell(node_num, dim_out, dim_out, window_len, link_len, embed_dim))
 
     def forward(self, x, init_state, node_embeddings, zigzag_PI):
         assert x.shape[2] == self.node_num and x.shape[3] == self.input_dim
@@ -27,7 +27,7 @@ class NNLSDCRNNCNN(nn.Module):
             inner_states = []
             for t in range(seq_length):
                 state = self.nlsdcrnncnn_cells[i](current_inputs[:, t, :, :], state, current_inputs,
-                                                  node_embeddings, zigzag_PI[:, :, :].view(-1, 1, 100, 100)) # ZPI input shape
+                                                  node_embeddings, zigzag_PI[:, :, :].view(-1, 1, 100, 100)) #zigzag PI input shape
                 inner_states.append(state)
             output_hidden.append(state)
             current_inputs = torch.stack(inner_states, dim=1)
@@ -37,9 +37,9 @@ class NNLSDCRNNCNN(nn.Module):
         init_states = []
         for i in range(self.num_layers):
             init_states.append(self.nlsdcrnncnn_cells[i].init_hidden_state(batch_size))
-        return torch.stack(init_states, dim=0) # (num_layers, B, N, hidden_dim)
+        return torch.stack(init_states, dim=0) #(num_layers, B, N, hidden_dim)
 
-# ************************************************* #
+#------------------------------------------------------------------------------------------------------------------------#
 class NNLSGCRNCNN(nn.Module):
     def __init__(self, args):
         super(NNLSGCRNCNN, self).__init__()
@@ -60,14 +60,16 @@ class NNLSGCRNCNN(nn.Module):
         self.end_conv = nn.Conv2d(1, args.horizon * self.output_dim, kernel_size=(1, self.hidden_dim), bias=True)
 
     def forward(self, source, targets, zigzag_PI, teacher_forcing_ratio=0.5):
+        #source: B, T_1, N, D
+        #target: B, T_2, N, D
 
         init_state = self.encoder.init_hidden(source.shape[0])
-        output, _ = self.encoder(source, init_state, self.node_embeddings, zigzag_PI) # (B, T, N, hidden)
-        output = output[:, -1:, :, :] # (B, 1, N, hidden)
+        output, _ = self.encoder(source, init_state, self.node_embeddings, zigzag_PI) #B, T, N, hidden
+        output = output[:, -1:, :, :] #B, 1, N, hidden
 
         #CNN based predictor
-        output = self.end_conv((output)) # (B, T*C, N, 1)
+        output = self.end_conv((output)) #B, T*C, N, 1
         output = output.squeeze(-1).reshape(-1, self.horizon, self.output_dim, self.num_node)
-        output = output.permute(0, 1, 3, 2) # (B, T, N, C)
+        output = output.permute(0, 1, 3, 2) #B, T, N, C
 
         return output
