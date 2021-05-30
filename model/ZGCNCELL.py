@@ -1,20 +1,22 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ZGCN import TLSGCNCNN
+from ZGCN import TLSGCNCNN, TFLSGCNCNN
 
-# GRU with the output from TLSGCNCNN
+# GRU with the output from ZGCN.py
 class NLSGCRNCNNCell(nn.Module):
-    def __init__(self, node_num, dim_in, dim_out, window_len, cheb_k, embed_dim):
+    def __init__(self, node_num, dim_in, dim_out, window_len, link_len, embed_dim):
         super(NLSGCRNCNNCell, self).__init__()
         self.node_num = node_num
         self.hidden_dim = dim_out
-        self.gate = TLSGCNCNN(dim_in+self.hidden_dim, 2*dim_out, window_len, cheb_k, embed_dim)
-        self.update = TLSGCNCNN(dim_in+self.hidden_dim, dim_out, window_len, cheb_k, embed_dim)
+        self.gate = TFLSGCNCNN(dim_in+self.hidden_dim, 2*dim_out, window_len, link_len, embed_dim)
+        self.update = TFLSGCNCNN(dim_in+self.hidden_dim, dim_out, window_len, link_len, embed_dim)
 
     def forward(self, x, state, x_full, node_embeddings, zigzag_PI):
+        #x: B, num_nodes, input_dim
+        #state: B, num_nodes, hidden_dim
         state = state.to(x.device)
-        input_and_state = torch.cat((x, state), dim=-1) # x + state
+        input_and_state = torch.cat((x, state), dim=-1) #x + state
         z_r = torch.sigmoid(self.gate(input_and_state, x_full, node_embeddings, zigzag_PI))
         z, r = torch.split(z_r, self.hidden_dim, dim=-1)
         candidate = torch.cat((x, z*state), dim=-1)
